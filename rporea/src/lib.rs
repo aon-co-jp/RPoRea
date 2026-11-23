@@ -7,6 +7,7 @@
 //!
 //! 3姉妹(Reaxt・RPoRea・open-cosmo)は常に同時開発する(`docs/THREE-SISTERS.md`)。
 pub use open_runo_poem_compat as poem;
+pub mod behind_proxy;
 pub use reaxt;
 pub use reaxt_rpoem;
 
