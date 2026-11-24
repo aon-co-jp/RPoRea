@@ -963,3 +963,55 @@ A execução agendada do `docs-latest` (evento `schedule`) teve sucesso às 21:0
 ## 2026-11-23 追記: Tomcat相当の層・Apache/nginxの背後での運用 / Tomcat-like layer and running behind Apache/nginx
 **日本語**: open-web-server(Apache相当)とRPoRea(Tomcat相当)をセットで使いつつ、本物のApache・nginxの背後にも置けるようにした。`rporea::behind_proxy`(`Cidr`・`resolve`・`strip_prefix`)が、信頼プロキシからの `X-Forwarded-*` だけを信じて本当のクライアントIP・https・ホスト・URL接頭辞を解決する(単体試験6件成功、なりすまし・不正値・`..` の拒否を含む)。設定例は [`docs/BEHIND-APACHE-NGINX.md`](docs/BEHIND-APACHE-NGINX.md)。**未了**: `serve` への自動組み込み、実Apache/nginxでの通し試験、WebSocket/h2c、`open-runo-appserver` との接続。
 **English**: open-web-server (Apache-like) and RPoRea (Tomcat-like) work as a set and RPoRea can also run behind a real Apache or nginx. `rporea::behind_proxy` (`Cidr`, `resolve`, `strip_prefix`) trusts `X-Forwarded-*` only from trusted proxies to resolve the real client IP, https, host and URL prefix (6 unit tests pass, including spoofing, malformed values and `..`). Examples: [`docs/BEHIND-APACHE-NGINX.md`](docs/BEHIND-APACHE-NGINX.md). **Open**: automatic wiring into `serve`, an end-to-end run with real Apache/nginx, WebSocket/h2c, and linking with `open-runo-appserver`.
+
+## 2026-11-25 現況・未了 / Status and open items
+
+*日本語・English が基本、ほかの言語は AI 翻訳(ネイティブ確認前)。 / Japanese and English are the base; other languages are AI-translated, not native-checked.*
+
+### 日本語
+
+現状: RPoem と Reaxt を合わせたもの(Rust 基本、C ABI あり)。最近は behind_proxy(信頼するプロキシの X-Forwarded-* とパス接頭辞)と Apache・nginx の手引きを追加し、信頼しない接続元・IPv6・プロトコルの大文字小文字・入れ子の接頭辞などの試験を足した。残り: Mac・iPhone の実機での確認(ここには実機がありません)。翻訳: AI 翻訳(ja/en 以外)、ネイティブの確認はまだです。
+
+### English
+
+Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_proxy (trusted X-Forwarded-* headers and path prefix) and an Apache/nginx guide were added, with tests for untrusted peers, IPv6, protocol case and nested prefixes. Open: checks on a real Mac and iPhone (no such devices here). Translations: AI-translated (other than ja/en), not yet checked by native speakers.
+
+### 简体中文
+
+现状:把 RPoem 与 Reaxt 合为一体(以 Rust 为主,提供 C ABI)。最近新增了 behind_proxy(信任代理的 X-Forwarded-* 与路径前缀)和 Apache/nginx 指南,并补充了针对不受信任的来源、IPv6、协议大小写和嵌套前缀的测试。待办:在真实的 Mac 和 iPhone 上验证(这里没有这些设备)。翻译:由 AI 翻译,尚未经母语者确认。
+
+### 繁體中文
+
+現況:把 RPoem 與 Reaxt 合為一體(以 Rust 為主,提供 C ABI)。最近新增了 behind_proxy(信任代理的 X-Forwarded-* 與路徑前綴)和 Apache/nginx 指南,並補充了針對不受信任的來源、IPv6、協定大小寫和巢狀前綴的測試。待辦:在實體 Mac 和 iPhone 上驗證(這裡沒有這些裝置)。翻譯:由 AI 翻譯,尚未經母語人士確認。
+
+### 한국어
+
+현황: RPoem과 Reaxt를 합친 것입니다(Rust 중심, C ABI 제공). 최근 behind_proxy(신뢰하는 프록시의 X-Forwarded-*와 경로 접두사)와 Apache/nginx 안내를 추가했고, 신뢰할 수 없는 접속자, IPv6, 프로토콜 대소문자, 중첩 접두사 등의 시험을 보강했습니다. 남은 일: 실제 Mac과 iPhone에서의 확인(여기에는 해당 기기가 없습니다). 번역: AI 번역이며 원어민의 확인은 아직 받지 않았습니다.
+
+### Deutsch
+
+Stand: RPoem und Reaxt in einem (Rust zuerst, mit C ABI). Zuletzt kamen behind_proxy (vertrauenswürdige X-Forwarded-*-Header und Pfadpräfix) und eine Apache/nginx-Anleitung hinzu, dazu Tests für nicht vertrauenswürdige Gegenstellen, IPv6, Groß-/Kleinschreibung des Protokolls und verschachtelte Präfixe. Offen: Prüfung auf einem echten Mac und iPhone (solche Geräte haben wir hier nicht). Übersetzungen: KI-übersetzt, noch nicht von Muttersprachlern geprüft.
+
+### Français
+
+État : RPoem et Reaxt réunis (Rust d'abord, avec une ABI C). Récemment, behind_proxy (en-têtes X-Forwarded-* d'un proxy de confiance et préfixe de chemin) et un guide Apache/nginx ont été ajoutés, avec des tests pour les pairs non fiables, IPv6, la casse du protocole et les préfixes imbriqués. Reste à faire : vérifier sur un vrai Mac et un vrai iPhone (nous n'avons pas ces appareils ici). Traductions : faites par IA, pas encore relues par des locuteurs natifs.
+
+### Español
+
+Estado: RPoem y Reaxt unidos (Rust primero, con ABI de C). Hace poco se añadieron behind_proxy (cabeceras X-Forwarded-* de un proxy de confianza y prefijo de ruta) y una guía de Apache/nginx, junto con pruebas de pares no confiables, IPv6, mayúsculas del protocolo y prefijos anidados. Pendiente: comprobar en un Mac y un iPhone reales (aquí no tenemos esos dispositivos). Traducciones: hechas por IA, aún sin revisión de hablantes nativos.
+
+### Português
+
+Situação: RPoem e Reaxt reunidos (Rust primeiro, com ABI C). Recentemente foram adicionados behind_proxy (cabeçalhos X-Forwarded-* de um proxy confiável e prefixo de caminho) e um guia de Apache/nginx, com testes para pares não confiáveis, IPv6, maiúsculas e minúsculas do protocolo e prefixos aninhados. Pendente: verificar em um Mac e um iPhone de verdade (não temos esses aparelhos aqui). Traduções: feitas por IA, ainda não revisadas por falantes nativos.
+
+### Русский
+
+Состояние: RPoem и Reaxt в одном (в основе Rust, есть C ABI). Недавно добавлены behind_proxy (заголовки X-Forwarded-* доверенного прокси и префикс пути) и руководство по Apache/nginx, а также тесты для недоверенных узлов, IPv6, регистра протокола и вложенных префиксов. Осталось: проверка на настоящих Mac и iPhone (таких устройств у нас здесь нет). Переводы: выполнены ИИ, носители языка их пока не проверяли.
+
+### العربية
+
+الوضع: RPoem وReaxt معًا (Rust أولًا مع واجهة C ABI). أُضيف مؤخرًا behind_proxy (ترويسات X-Forwarded-* من وكيل موثوق وبادئة المسار) ودليل لـ Apache/nginx، مع اختبارات للأطراف غير الموثوقة وIPv6 وحالة أحرف البروتوكول والبادئات المتداخلة. المتبقي: التحقق على جهازَي Mac وiPhone حقيقيين (لا تتوفر لدينا هذه الأجهزة هنا). الترجمات: أنجزها الذكاء الاصطناعي ولم يراجعها بعدُ متحدثون أصليون.
+
+### فارسی
+
+وضعیت: ترکیب RPoem و Reaxt (اول Rust، با C ABI). اخیراً behind_proxy (سرآیندهای X-Forwarded-* از پروکسی مورد اعتماد و پیشوند مسیر) و راهنمای Apache/nginx افزوده شد، همراه با آزمون‌هایی برای همتای نامعتبر، IPv6، حروف بزرگ و کوچک پروتکل و پیشوندهای تودرتو. باقی‌مانده: بررسی روی Mac و iPhone واقعی (این دستگاه‌ها را اینجا نداریم). ترجمه‌ها: با هوش مصنوعی انجام شده و هنوز گویشوران بومی آن‌ها را بررسی نکرده‌اند.
