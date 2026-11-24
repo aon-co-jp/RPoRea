@@ -1,3 +1,5 @@
+> Latest translations / 翻訳の最新版: [0-LATEST-TRANSLATIONS.md](0-LATEST-TRANSLATIONS.md)
+
 # RPoRea
 
 [日本語](#日本語) · [English](#english) · [简体中文](#简体中文) · [繁體中文(台灣)](#繁體中文台灣) · [한국어](#한국어) · [Deutsch](#deutsch) · [Français](#français) · [Español](#español) · [Português (Brasil)](#português-brasil) · [Русский](#русский)
