@@ -988,7 +988,7 @@ Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_pro
 
 ### 한국어
 
-현황: RPoem과 Reaxt를 합친 것입니다(Rust 중심, C ABI 제공). 최근 behind_proxy(신뢰하는 프록시의 X-Forwarded-*와 경로 접두사)와 Apache/nginx 안내를 추가했고, 신뢰할 수 없는 접속자, IPv6, 프로토콜 대소문자, 중첩 접두사 등의 시험을 보강했습니다. 남은 일: 실제 Mac과 iPhone에서의 확인(여기에는 해당 기기가 없습니다). 번역: AI 번역이며 원어민의 확인은 아직 받지 않았습니다.
+현황: RPoem과 Reaxt를 합친 것입니다(Rust 중심, C ABI 제공). 최근 behind_proxy(신뢰하는 프록시의 X-Forwarded-*와 경로 접두사)와 Apache/nginx 안내를 추가했고, 신뢰할 수 없는 접속자, IPv6, 프로토콜 대소문자, 중첩 접두사 등의 테스트을 보강했습니다. 남은 일: 실제 Mac과 iPhone에서의 확인(여기에는 해당 기기가 없습니다). 번역: AI 번역이며 원어민의 확인은 아직 받지 않았습니다.
 
 ### Deutsch
 
