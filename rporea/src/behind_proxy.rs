@@ -209,4 +209,22 @@ mod tests {
         let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-prefix", "/")]), &t());
         assert_eq!(o.prefix, "");
     }
+
+    #[test]
+    fn untrusted_peer_ignores_all_forwarded_headers_and_chain_stops_at_first_untrusted() {
+        // untrusted peer: https/host/prefix headers are all ignored
+        let o = resolve(
+            "203.0.113.5".parse().unwrap(),
+            hdr(&[("x-forwarded-proto", "https"), ("x-forwarded-host", "evil.example"), ("x-forwarded-prefix", "/x"), ("host", "real.example")]),
+            &t(),
+        );
+        assert_eq!((o.https, o.host.as_deref(), o.prefix.as_str()), (false, Some("real.example"), ""));
+        // trusted peer: XFF is walked from the right and stops at the first untrusted hop
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-for", "9.9.9.9, 198.51.100.7, 10.1.1.1")]), &t());
+        assert_eq!(o.client_ip, "198.51.100.7".parse::<IpAddr>().unwrap());
+        // proto is case-insensitive, and a nested prefix is kept
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-proto", "HTTPS"), ("x-forwarded-prefix", "/a/b/")]), &t());
+        assert!(o.https);
+        assert_eq!(o.prefix, "/a/b");
+    }
 }
