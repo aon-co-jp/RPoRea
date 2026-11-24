@@ -162,4 +162,32 @@ mod tests {
         assert_eq!(strip_prefix("/apple/x", "/app"), "/apple/x");
         assert_eq!(strip_prefix("/x", ""), "/x");
     }
+
+    #[test]
+    fn edge_cases_ipv6_all_trusted_and_proto_list() {
+        // IPv6 client behind a trusted IPv4 proxy
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-for", "2001:db8::1"), ("x-forwarded-proto", "https, http")]), &t());
+        assert_eq!(o.client_ip.to_string(), "2001:db8::1");
+        assert!(o.https); // the first value of the list wins
+        // every hop trusted: the leftmost entry is the client
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-for", "10.1.1.1, 10.2.2.2")]), &t());
+        assert_eq!(o.client_ip.to_string(), "10.1.1.1");
+        // plain http, and no forwarded host falls back to Host
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-proto", "http"), ("host", "h.example")]), &t());
+        assert!(!o.https);
+        assert_eq!(o.host.as_deref(), Some("h.example"));
+        // empty forwarded host is ignored
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-host", " "), ("host", "h.example")]), &t());
+        assert_eq!(o.host.as_deref(), Some("h.example"));
+    }
+
+    #[test]
+    fn unsafe_prefixes_are_dropped() {
+        for bad in ["/a b", "/a\\b", "/a/../b", "/a\tb"] {
+            let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-prefix", bad)]), &t());
+            assert_eq!(o.prefix, "", "{bad:?}");
+        }
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-prefix", "/")]), &t());
+        assert_eq!(o.prefix, "");
+    }
 }
