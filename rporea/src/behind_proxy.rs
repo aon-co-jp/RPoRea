@@ -182,6 +182,25 @@ mod tests {
     }
 
     #[test]
+    fn cidr_parse_and_prefix_edge_cases() {
+        // IPv6 prefix match and mismatch
+        let c = Cidr::parse("2001:db8::/32").unwrap();
+        assert!(c.contains("2001:db8:1::5".parse().unwrap()));
+        assert!(!c.contains("2001:db9::1".parse().unwrap()));
+        // a /0 of one family does not cover the other family
+        assert!(!Cidr::parse("0.0.0.0/0").unwrap().contains("::1".parse().unwrap()));
+        // garbage and out-of-range lengths are rejected
+        for bad in ["", "abc", "10.0.0.0/x", "::1/129", "10.0.0.0/-1"] {
+            assert!(Cidr::parse(bad).is_none(), "{bad:?}");
+        }
+        // surrounding spaces are tolerated
+        assert!(Cidr::parse(" 10.0.0.0 / 8 ").is_some());
+        // strip_prefix keeps a path that only shares the prefix text, and handles a trailing slash
+        assert_eq!(strip_prefix("/app/", "/app"), "/");
+        assert_eq!(strip_prefix("/ap", "/app"), "/ap");
+    }
+
+    #[test]
     fn unsafe_prefixes_are_dropped() {
         for bad in ["/a b", "/a\\b", "/a/../b", "/a\tb"] {
             let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-prefix", bad)]), &t());
