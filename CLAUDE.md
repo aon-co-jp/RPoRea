@@ -901,3 +901,13 @@ A execução agendada do `docs-latest` (evento `schedule`) teve sucesso às 21:0
 - **日本語**: `rporea::behind_proxy` に、信頼できない接続元では `X-Forwarded-*` がすべて無視されること、`X-Forwarded-For` は右から辿って最初の信頼できない転送元で止まること、`X-Forwarded-Proto: HTTPS` の大文字小文字を区別しないこと、入れ子の接頭辞(`/a/b/`→`/a/b`)が保たれることの試験を足しました(コードの動作は変更なし。`cargo test -p rporea behind_proxy` 9件成功)。未了: `serve` への自動組み込み、実 Apache/nginx での通し試験。
 - **English**: I added a test to `rporea::behind_proxy` showing that an untrusted peer has every `X-Forwarded-*` header ignored, that `X-Forwarded-For` is walked from the right and stops at the first untrusted hop, that `X-Forwarded-Proto: HTTPS` is case-insensitive, and that a nested prefix (`/a/b/` becomes `/a/b`) is kept. No behavior changed. `cargo test -p rporea behind_proxy`: 9 pass. Still open: wiring into `serve` and an end-to-end run with real Apache/nginx.
 - AI-translated and AI-reviewed for native fluency (English); not yet checked by a human native speaker.
+
+## 2026-11-25 現況・未了 / Status and open items
+
+### 日本語
+
+現状: RPoem と Reaxt を合わせたもの(Rust 基本、C ABI あり)。最近は behind_proxy(信頼するプロキシの X-Forwarded-* とパス接頭辞)と Apache・nginx の手引きを追加し、信頼しない接続元・IPv6・プロトコルの大文字小文字・入れ子の接頭辞などの試験を足した。残り: Mac・iPhone の実機での確認(ここには実機がありません)。翻訳: AI 翻訳(ja/en 以外)、ネイティブの確認はまだです。
+
+### English
+
+Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_proxy (trusted X-Forwarded-* headers and path prefix) and an Apache/nginx guide were added, with tests for untrusted peers, IPv6, protocol case and nested prefixes. Open: checks on a real Mac and iPhone (no such devices here). Translations: AI-translated (other than ja/en), not yet checked by native speakers.

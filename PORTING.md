@@ -842,3 +842,13 @@ A execução agendada do `docs-latest` (evento `schedule`) teve sucesso às 21:0
 ## 2026-11-24 追記: behind_proxy の信頼境界の試験 / behind_proxy trust-boundary test
 - **日本語**: 信頼できない接続元で `X-Forwarded-*` を無視すること、`X-Forwarded-For` が最初の信頼できない転送元で止まること、プロトコルの大文字小文字、入れ子の接頭辞の試験を追加(動作変更なし、9件成功)。未了: `serve` への組み込み、実 Apache/nginx での通し試験。
 - **English**: Added tests for ignoring `X-Forwarded-*` from untrusted peers, `X-Forwarded-For` stopping at the first untrusted hop, case-insensitive protocol, and nested prefixes (no behavior change, 9 pass). Open: wiring into `serve`, and an end-to-end run with real Apache/nginx.
+
+## 2026-11-25 現況・未了 / Status and open items
+
+### 日本語
+
+現状: RPoem と Reaxt を合わせたもの(Rust 基本、C ABI あり)。最近は behind_proxy(信頼するプロキシの X-Forwarded-* とパス接頭辞)と Apache・nginx の手引きを追加し、信頼しない接続元・IPv6・プロトコルの大文字小文字・入れ子の接頭辞などの試験を足した。残り: Mac・iPhone の実機での確認(ここには実機がありません)。翻訳: AI 翻訳(ja/en 以外)、ネイティブの確認はまだです。
+
+### English
+
+Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_proxy (trusted X-Forwarded-* headers and path prefix) and an Apache/nginx guide were added, with tests for untrusted peers, IPv6, protocol case and nested prefixes. Open: checks on a real Mac and iPhone (no such devices here). Translations: AI-translated (other than ja/en), not yet checked by native speakers.
