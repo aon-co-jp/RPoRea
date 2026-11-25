@@ -331,4 +331,18 @@ mod tests {
         let o = resolve(peer, hdr(&[("x-forwarded-prefix", "//app//")]), &t());
         assert_eq!(o.prefix, "/app");
     }
+
+    #[test]
+    fn host_port_is_kept_and_forwarded_host_wins() {
+        let peer: std::net::IpAddr = "10.1.2.3".parse().unwrap();
+        // A port in X-Forwarded-Host is kept verbatim and wins over Host.
+        let o = resolve(peer, hdr(&[("host", "internal:8080"), ("x-forwarded-host", "example.com:8443")]), &t());
+        assert_eq!(o.host.as_deref(), Some("example.com:8443"));
+        // Without X-Forwarded-Host, Host (with port) is used.
+        let o = resolve(peer, hdr(&[("host", "internal:8080")]), &t());
+        assert_eq!(o.host.as_deref(), Some("internal:8080"));
+        // An untrusted peer never gets the forwarded host.
+        let o = resolve("203.0.113.5".parse().unwrap(), hdr(&[("host", "a"), ("x-forwarded-host", "evil")]), &t());
+        assert_eq!(o.host.as_deref(), Some("a"));
+    }
 }
