@@ -369,4 +369,20 @@ mod tests {
         assert!(!resolve(peer, hdr(&[("x-forwarded-proto", "wss")]), &t()).https);
         assert!(!resolve(peer, hdr(&[("x-forwarded-proto", "")]), &t()).https);
     }
+
+    #[test]
+    fn ipv6_cidr_boundary_and_single_dot_prefix() {
+        let c = Cidr::parse("2001:db8::/64").unwrap();
+        assert!(c.contains("2001:db8::1".parse().unwrap()));
+        assert!(c.contains("2001:db8:0:0:ffff:ffff:ffff:ffff".parse().unwrap()));
+        assert!(!c.contains("2001:db8:0:1::1".parse().unwrap()));
+        // An IPv6 trusted proxy yields an IPv6 client from X-Forwarded-For.
+        let trusted = vec![c];
+        let peer: std::net::IpAddr = "2001:db8::5".parse().unwrap();
+        let o = resolve(peer, hdr(&[("x-forwarded-for", "2001:db9::7, 2001:db8::9")]), &trusted);
+        assert_eq!(o.client_ip, "2001:db9::7".parse::<std::net::IpAddr>().unwrap());
+        // A single dot in a prefix is fine; only ".." is rejected.
+        let o = resolve(peer, hdr(&[("x-forwarded-prefix", "/app.v1/")]), &trusted);
+        assert_eq!(o.prefix, "/app.v1");
+    }
 }
