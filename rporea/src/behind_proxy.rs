@@ -293,4 +293,18 @@ mod tests {
         assert_eq!(o2.host.as_deref(), Some("h.example"));
         assert_eq!(o2.prefix, "");
     }
+
+    #[test]
+    fn cidr_host_bits_and_strip_prefix_boundaries() {
+        assert!(Cidr::parse("10.0.0.0/33").is_none());
+        let host = Cidr::parse("10.1.2.3/32").unwrap();
+        assert!(host.contains("10.1.2.3".parse().unwrap()));
+        assert!(!host.contains("10.1.2.4".parse().unwrap()));
+        let all6 = Cidr::parse("::/0").unwrap();
+        assert!(all6.contains("2001:db8::1".parse().unwrap()));
+        assert_eq!(strip_prefix("", "/app"), "");
+        assert_eq!(strip_prefix("/app", "/app"), "/");
+        assert_eq!(strip_prefix("/app/", "/app"), "/");
+        assert_eq!(strip_prefix("/application", "/app"), "/application");
+    }
 }
