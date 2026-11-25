@@ -428,4 +428,16 @@ mod tests {
         // a wider IPv6 prefix that merely starts with the mapped range is left alone
         assert!(Cidr::parse("::ffff:10.0.0.0/64").unwrap().contains("::1".parse().unwrap()));
     }
+
+    #[test]
+    fn ipv4_mapped_cidr_96_and_128_boundaries() {
+        // /96 on the mapped range means "every IPv4 address".
+        let all = Cidr::parse("::ffff:0.0.0.0/96").unwrap();
+        assert!(all.contains("203.0.113.7".parse().unwrap()));
+        assert!(!all.contains("2001:db8::1".parse().unwrap()));
+        // /128 is a single IPv4 host.
+        let one = Cidr::parse("::ffff:10.0.0.5/128").unwrap();
+        assert!(one.contains("10.0.0.5".parse().unwrap()));
+        assert!(!one.contains("10.0.0.6".parse().unwrap()));
+    }
 }
