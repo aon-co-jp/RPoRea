@@ -862,3 +862,8 @@ Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_pro
 ## 2026-11-25 追記: MFastAPI は Mojo から使えること / Addendum: MFastAPI must be usable from Mojo
 **日本語**: MFastAPI は **Mojo から使用できる仕様**を保つ(Python 構文・Rust 実装・Mojo 対応、Windows では RMojo の `compat/wsl-bridge` 経由で WSL 上の Mojo を使う)。2MFastAPI の変換結果も Mojo から使えること。現状: `mojo/` は参照実装で、段階B・Cのサーバーは実験的。Mojo からの呼び出しの実機確認は、確認済みの範囲だけを「確認済み」と書く。11:30 まで確認なしで自動で進める。
 **English**: MFastAPI keeps the **specification of being usable from Mojo** (Python syntax, Rust core, Mojo support; on Windows the real Mojo in WSL is driven through RMojo's `compat/wsl-bridge`). Output of 2MFastAPI must be usable from Mojo too. Current state: `mojo/` is a reference implementation and its stage B/C servers are experimental. Only what was actually run is called "verified". Continue automatically without asking until 11:30.
+
+## 2026-11-25 追記: behind_proxy の多段転送の試験 / behind_proxy multi-hop test
+- **日本語**: 多段の信頼プロキシ・`X-Forwarded-Host` の複数値・接頭辞と同じパスの試験を追加(動作変更なし、11件成功)。未了: `serve` への自動組み込み、実 Apache/nginx での通し試験。
+- **English**: Added tests for multi-hop trusted proxies, multiple `X-Forwarded-Host` values and a path equal to the prefix (no behavior change, 11 pass). Still open: wiring into `serve` and an end-to-end run with real Apache/nginx.
+- English: AI-translated and AI-reviewed for native fluency; not yet checked by a human native speaker.

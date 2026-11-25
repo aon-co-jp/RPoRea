@@ -242,4 +242,17 @@ mod tests {
         // strip_prefix must not cut inside a path segment
         assert_eq!(strip_prefix("/abc/x", "/a"), "/abc/x");
     }
+
+    #[test]
+    fn multi_hop_chain_and_host_list() {
+        // trusted intermediate proxies on the right are skipped; the first untrusted hop is the client
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-for", "203.0.113.9, 198.51.100.7, 10.1.1.1, 10.2.2.2")]), &t());
+        assert_eq!(o.client_ip, "198.51.100.7".parse::<IpAddr>().unwrap());
+        // X-Forwarded-Host with several values uses the first one
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-host", "a.example, b.example"), ("host", "inner")]), &t());
+        assert_eq!(o.host.as_deref(), Some("a.example"));
+        // path equal to the prefix becomes the root
+        assert_eq!(strip_prefix("/app", "/app"), "/");
+        assert_eq!(strip_prefix("/app/x", "/app"), "/x");
+    }
 }
