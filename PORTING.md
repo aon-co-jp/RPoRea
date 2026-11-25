@@ -879,3 +879,8 @@ Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_pro
 - **日本語**: `rporea::behind_proxy` に、`Host` も `X-Forwarded-Host` も無いとき `host` が `None` になること、`X-Forwarded-For` の角括弧つきIPv6(`[2001:db8::1]`)は不正値として扱い接続元を保つことの試験を足しました(動作変更なし。`cargo test -p rporea behind_proxy` 16件成功)。未了: `serve` への自動組み込み、WebSocket/h2c の転送試験。
 - **English**: I added a test to `rporea::behind_proxy`: with neither `Host` nor `X-Forwarded-Host`, `host` is `None`; a bracketed IPv6 literal (`[2001:db8::1]`) in `X-Forwarded-For` is treated as invalid and the peer is kept. No behavior changed. `cargo test -p rporea behind_proxy`: 16 pass. Still open: wiring into `serve` and WebSocket/h2c forwarding tests.
 - English: AI-translated and AI-reviewed for native fluency; not yet checked by a human native speaker.
+
+## 2026-11-25 追記: behind_proxy の X-Forwarded-Proto の試験(自動の小さな保守) / X-Forwarded-Proto test (small automated maintenance)
+- **日本語**: `rporea::behind_proxy` に、`X-Forwarded-Proto` は先頭の値だけを見ること(`http, https` は https にならない)、前後の空白と大文字小文字は許容すること、`wss` や空の値は https として扱わないことの試験を足しました(動作変更なし。`cargo test -p rporea behind_proxy` 19件成功)。未了: `serve` への自動組み込み、WebSocket/h2c の転送試験。
+- **English**: I added a test to `rporea::behind_proxy`: only the first `X-Forwarded-Proto` value counts (`http, https` is not https), surrounding spaces and letter case are tolerated, and `wss` or an empty value is never treated as https. No behavior changed. `cargo test -p rporea behind_proxy`: 19 pass. Still open: wiring into `serve` and WebSocket/h2c forwarding tests.
+- English: AI-translated and AI-reviewed for native fluency; not yet checked by a human native speaker.

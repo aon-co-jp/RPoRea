@@ -972,3 +972,8 @@ Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_pro
 ## 2026-11-25 追記: behind_proxy の https・接頭辞の信頼境界の試験(自動の小さな保守) / https and prefix trust-boundary test (small automated maintenance)
 - **日本語**: `rporea::behind_proxy` に、信頼できない接続元は `X-Forwarded-Proto: https` や `X-Forwarded-Prefix` を名乗れないこと、信頼プロキシでも空の `X-Forwarded-Proto` は http になることの試験を足しました(動作変更なし)。兄弟リポジトリが欠けた環境のため `rustc --test` で単独実行し19件成功(`cargo test --workspace` は未実行)。日本語と英語のみ書き、ほかの言語の訳は作っていません(ネイティブ確認前の扱いのまま)。
 - **English**: Added a `behind_proxy` test: an untrusted peer cannot claim https or a mount prefix, and a trusted proxy with an empty `X-Forwarded-Proto` is plain http. No behavior changed. Sibling repos are missing here, so I ran the module with `rustc --test` (19 pass); `cargo test --workspace` was not run. Only Japanese and English were written; no other translations (still not native-checked).
+
+## 2026-11-25 追記: behind_proxy の X-Forwarded-Proto の試験(自動の小さな保守) / X-Forwarded-Proto test (small automated maintenance)
+- **日本語**: `rporea::behind_proxy` に、`X-Forwarded-Proto` は先頭の値だけを見ること(`http, https` は https にならない)、前後の空白と大文字小文字は許容すること、`wss` や空の値は https として扱わないことの試験を足しました(動作変更なし。`cargo test -p rporea behind_proxy` 19件成功)。未了: `serve` への自動組み込み、WebSocket/h2c の転送試験。
+- **English**: I added a test to `rporea::behind_proxy`: only the first `X-Forwarded-Proto` value counts (`http, https` is not https), surrounding spaces and letter case are tolerated, and `wss` or an empty value is never treated as https. No behavior changed. `cargo test -p rporea behind_proxy`: 19 pass. Still open: wiring into `serve` and WebSocket/h2c forwarding tests.
+- English: AI-translated and AI-reviewed for native fluency; not yet checked by a human native speaker.
