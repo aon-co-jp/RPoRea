@@ -385,4 +385,19 @@ mod tests {
         let o = resolve(peer, hdr(&[("x-forwarded-prefix", "/app.v1/")]), &trusted);
         assert_eq!(o.prefix, "/app.v1");
     }
+
+    #[test]
+    fn prefix_lists_with_spaces_are_dropped_and_cidr_tolerates_inner_spaces() {
+        // A comma list with a space is not a single safe prefix: it is dropped, not guessed.
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-prefix", "/a, /b")]), &t());
+        assert_eq!(o.prefix, "");
+        // Letter case in a prefix is kept as sent.
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-prefix", "/App")]), &t());
+        assert_eq!(o.prefix, "/App");
+        // Spaces around the slash and around the parts are tolerated; a blank string is not a CIDR.
+        let c = Cidr::parse(" 10.0.0.0 / 8 ").unwrap();
+        assert!(c.contains("10.200.0.1".parse().unwrap()));
+        assert!(Cidr::parse("   ").is_none());
+        assert!(Cidr::parse("10.0.0.0/").is_none());
+    }
 }
