@@ -278,4 +278,19 @@ mod tests {
         let o = resolve("10.1.1.1".parse().unwrap(), hdr(&[("x-forwarded-for", "")]), &t());
         assert_eq!(o.client_ip, "10.1.1.1".parse::<IpAddr>().unwrap());
     }
+
+    #[test]
+    fn empty_trust_list_and_blank_forwarded_values() {
+        let h = hdr(&[("x-forwarded-for", "9.9.9.9"), ("x-forwarded-proto", "https"), ("host", "h.example")]);
+        // with no trusted proxies, even a loopback peer is treated as an ordinary client
+        let o = resolve("127.0.0.1".parse().unwrap(), &h, &[]);
+        assert_eq!(o.client_ip, "127.0.0.1".parse::<IpAddr>().unwrap());
+        assert!(!o.https);
+        assert_eq!(o.host.as_deref(), Some("h.example"));
+        // a blank X-Forwarded-Host falls back to Host; a blank prefix stays empty
+        let h2 = hdr(&[("x-forwarded-host", "  "), ("host", "h.example"), ("x-forwarded-prefix", " / ")]);
+        let o2 = resolve("127.0.0.1".parse().unwrap(), &h2, &t());
+        assert_eq!(o2.host.as_deref(), Some("h.example"));
+        assert_eq!(o2.prefix, "");
+    }
 }
