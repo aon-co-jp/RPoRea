@@ -227,4 +227,19 @@ mod tests {
         assert!(o.https);
         assert_eq!(o.prefix, "/a/b");
     }
+
+    #[test]
+    fn trusted_peer_without_headers_and_garbage_hop() {
+        // no forwarded headers: the peer itself is the client, http, Host kept, no prefix
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("host", "h.example")]), &t());
+        assert_eq!((o.client_ip, o.https, o.host.as_deref(), o.prefix.as_str()), ("127.0.0.1".parse::<IpAddr>().unwrap(), false, Some("h.example"), ""));
+        // a garbage hop to the left of a good untrusted hop is never reached
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-for", "not-an-ip, 198.51.100.7")]), &t());
+        assert_eq!(o.client_ip, "198.51.100.7".parse::<IpAddr>().unwrap());
+        // a garbage hop right next to the proxy: keep the peer (last good hop)
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-for", "198.51.100.7, garbage")]), &t());
+        assert_eq!(o.client_ip, "127.0.0.1".parse::<IpAddr>().unwrap());
+        // strip_prefix must not cut inside a path segment
+        assert_eq!(strip_prefix("/abc/x", "/a"), "/abc/x");
+    }
 }
