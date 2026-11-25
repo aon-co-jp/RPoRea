@@ -23,6 +23,12 @@ impl Cidr {
             Some(b) => b.trim().parse::<u8>().ok().filter(|v| *v <= max)?,
             None => max,
         };
+        // An IPv4-mapped IPv6 network (`::ffff:10.0.0.0/104`) is the same as the plain IPv4 one (`10.0.0.0/8`).
+        if let IpAddr::V6(v6) = net {
+            if let (Some(v4), true) = (v6.to_ipv4_mapped(), bits >= 96) {
+                return Some(Cidr { net: IpAddr::V4(v4), bits: bits - 96 });
+            }
+        }
         Some(Cidr { net, bits })
     }
 
@@ -411,5 +417,15 @@ mod tests {
         // An untrusted IPv4-mapped IPv6 client is returned as sent.
         let o = resolve(peer, hdr(&[("x-forwarded-for", "::ffff:203.0.113.7")]), &trusted);
         assert_eq!(o.client_ip, "::ffff:203.0.113.7".parse::<std::net::IpAddr>().unwrap());
+    }
+
+    #[test]
+    fn ipv4_mapped_cidr_is_normalised_to_ipv4() {
+        let c = Cidr::parse("::ffff:10.0.0.0/104").unwrap();
+        assert!(c.contains("10.1.2.3".parse().unwrap()));
+        assert!(c.contains("::ffff:10.9.9.9".parse().unwrap()));
+        assert!(!c.contains("11.0.0.1".parse().unwrap()));
+        // a wider IPv6 prefix that merely starts with the mapped range is left alone
+        assert!(Cidr::parse("::ffff:10.0.0.0/64").unwrap().contains("::1".parse().unwrap()));
     }
 }
