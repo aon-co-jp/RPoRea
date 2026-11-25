@@ -307,4 +307,14 @@ mod tests {
         assert_eq!(strip_prefix("/app/", "/app"), "/");
         assert_eq!(strip_prefix("/application", "/app"), "/application");
     }
+
+    #[test]
+    fn missing_host_and_bracketed_ipv6_hop() {
+        // No Host and no X-Forwarded-Host at all: host stays None.
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[]), &t());
+        assert_eq!(o.host, None);
+        // A bracketed IPv6 literal is not a bare address: treated as garbage, the peer is kept.
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-for", "[2001:db8::1]")]), &t());
+        assert_eq!(o.client_ip, "127.0.0.1".parse::<std::net::IpAddr>().unwrap());
+    }
 }
