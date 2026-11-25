@@ -911,3 +911,7 @@ A execução agendada do `docs-latest` (evento `schedule`) teve sucesso às 21:0
 ### English
 
 Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_proxy (trusted X-Forwarded-* headers and path prefix) and an Apache/nginx guide were added, with tests for untrusted peers, IPv6, protocol case and nested prefixes. Open: checks on a real Mac and iPhone (no such devices here). Translations: AI-translated (other than ja/en), not yet checked by native speakers.
+
+## 2026-11-25 追記: behind_proxy のヘッダー無し・不正ホップの試験(自動の小さな保守) / behind_proxy no-header and garbage-hop test (small automated maintenance)
+- **日本語**: `rporea::behind_proxy` に、信頼プロキシでも転送ヘッダーが無ければ接続元自身がクライアント(http・`Host` 維持)になること、`X-Forwarded-For` の不正な値が左にあっても良い転送元に届かないこと、右隣が不正なら接続元を保つこと、`strip_prefix` が語の途中で切らないことの試験を足しました(動作変更なし)。兄弟リポジトリが欠けた環境のため `rustc --test` で単独実行し10件成功(`cargo test --workspace` は未実行)。日本語と英語のみ書き、ほかの言語の訳は作っていません(ネイティブ確認前の扱いのまま)。
+- **English**: I added tests to `rporea::behind_proxy`: a trusted peer with no forwarded headers is itself the client (http, `Host` kept); a garbage `X-Forwarded-For` entry left of a good hop is never reached; a garbage entry right next to the proxy keeps the peer; and `strip_prefix` does not cut inside a path segment. No behavior changed. Sibling repos are missing here, so I ran the module alone with `rustc --test` (10 pass); `cargo test --workspace` was not run. Only Japanese and English were written; no other translations were produced (they remain not native-checked).
