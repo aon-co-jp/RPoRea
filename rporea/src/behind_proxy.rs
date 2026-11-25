@@ -33,6 +33,8 @@ impl Cidr {
                 IpAddr::V6(v) => u128::from(v),
             }
         }
+        // A dual-stack socket reports an IPv4 peer as `::ffff:a.b.c.d`; treat it as the plain IPv4 address.
+        let ip = ip.to_canonical();
         if self.net.is_ipv4() != ip.is_ipv4() {
             return false;
         }
@@ -254,5 +256,15 @@ mod tests {
         // path equal to the prefix becomes the root
         assert_eq!(strip_prefix("/app", "/app"), "/");
         assert_eq!(strip_prefix("/app/x", "/app"), "/x");
+    }
+
+    #[test]
+    fn ipv4_mapped_ipv6_peer_matches_ipv4_cidr() {
+        let c = Cidr::parse("127.0.0.1").unwrap();
+        assert!(c.contains("::ffff:127.0.0.1".parse().unwrap()));
+        assert!(!c.contains("::ffff:127.0.0.2".parse().unwrap()));
+        let o = resolve("::ffff:10.1.2.3".parse().unwrap(), hdr(&[("x-forwarded-for", "198.51.100.7"), ("x-forwarded-proto", "https")]), &t());
+        assert_eq!(o.client_ip, "198.51.100.7".parse::<IpAddr>().unwrap());
+        assert!(o.https);
     }
 }
