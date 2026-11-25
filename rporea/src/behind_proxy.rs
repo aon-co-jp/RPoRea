@@ -317,4 +317,18 @@ mod tests {
         let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-for", "[2001:db8::1]")]), &t());
         assert_eq!(o.client_ip, "127.0.0.1".parse::<std::net::IpAddr>().unwrap());
     }
+
+    #[test]
+    fn trailing_comma_and_repeated_slash_prefix() {
+        let peer: std::net::IpAddr = "127.0.0.1".parse().unwrap();
+        // A trailing comma yields an empty last hop: garbage, so the peer is kept (never trust a half-formed list).
+        let o = resolve(peer, hdr(&[("x-forwarded-for", "203.0.113.9,")]), &t());
+        assert_eq!(o.client_ip, peer);
+        // Surrounding spaces around a good hop are fine.
+        let o = resolve(peer, hdr(&[("x-forwarded-for", "  203.0.113.9  ")]), &t());
+        assert_eq!(o.client_ip, "203.0.113.9".parse::<std::net::IpAddr>().unwrap());
+        // Outer repeated slashes collapse to one leading slash; inner ones are kept as given.
+        let o = resolve(peer, hdr(&[("x-forwarded-prefix", "//app//")]), &t());
+        assert_eq!(o.prefix, "/app");
+    }
 }
