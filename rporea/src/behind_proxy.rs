@@ -357,4 +357,16 @@ mod tests {
         let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-proto", "")]), &t());
         assert!(!o.https);
     }
+
+    #[test]
+    fn proto_uses_first_value_and_only_https_counts() {
+        let peer: std::net::IpAddr = "10.1.2.3".parse().unwrap();
+        // The first value wins: "http, https" is not https.
+        assert!(!resolve(peer, hdr(&[("x-forwarded-proto", "http, https")]), &t()).https);
+        // Surrounding spaces are tolerated and case is ignored.
+        assert!(resolve(peer, hdr(&[("x-forwarded-proto", "  HtTpS ")]), &t()).https);
+        // Other schemes (wss, empty) never count as https.
+        assert!(!resolve(peer, hdr(&[("x-forwarded-proto", "wss")]), &t()).https);
+        assert!(!resolve(peer, hdr(&[("x-forwarded-proto", "")]), &t()).https);
+    }
 }
