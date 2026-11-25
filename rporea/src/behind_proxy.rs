@@ -267,4 +267,15 @@ mod tests {
         assert_eq!(o.client_ip, "198.51.100.7".parse::<IpAddr>().unwrap());
         assert!(o.https);
     }
+
+    #[test]
+    fn mapped_hop_in_forwarded_for_and_plain_http_proto() {
+        // a trusted hop written as IPv4-mapped IPv6 is skipped; the next one left is the client
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-for", "198.51.100.9, ::ffff:10.0.0.5"), ("x-forwarded-proto", "http")]), &t());
+        assert_eq!(o.client_ip, "198.51.100.9".parse::<IpAddr>().unwrap());
+        assert!(!o.https);
+        // an empty X-Forwarded-For keeps the peer as the client
+        let o = resolve("10.1.1.1".parse().unwrap(), hdr(&[("x-forwarded-for", "")]), &t());
+        assert_eq!(o.client_ip, "10.1.1.1".parse::<IpAddr>().unwrap());
+    }
 }
