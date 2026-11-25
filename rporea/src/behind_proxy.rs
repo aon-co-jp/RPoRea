@@ -400,4 +400,16 @@ mod tests {
         assert!(Cidr::parse("   ").is_none());
         assert!(Cidr::parse("10.0.0.0/").is_none());
     }
+
+    #[test]
+    fn forged_left_entry_is_ignored_and_mapped_client_is_kept() {
+        let trusted = t();
+        let peer: std::net::IpAddr = "127.0.0.1".parse().unwrap();
+        // A client-supplied entry on the left of the real client must not win.
+        let o = resolve(peer, hdr(&[("x-forwarded-for", "9.9.9.9, 1.2.3.4")]), &trusted);
+        assert_eq!(o.client_ip, "1.2.3.4".parse::<std::net::IpAddr>().unwrap());
+        // An untrusted IPv4-mapped IPv6 client is returned as sent.
+        let o = resolve(peer, hdr(&[("x-forwarded-for", "::ffff:203.0.113.7")]), &trusted);
+        assert_eq!(o.client_ip, "::ffff:203.0.113.7".parse::<std::net::IpAddr>().unwrap());
+    }
 }
