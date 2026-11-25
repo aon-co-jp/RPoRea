@@ -345,4 +345,16 @@ mod tests {
         let o = resolve("203.0.113.5".parse().unwrap(), hdr(&[("host", "a"), ("x-forwarded-host", "evil")]), &t());
         assert_eq!(o.host.as_deref(), Some("a"));
     }
+
+    #[test]
+    fn untrusted_peer_never_gets_https_or_prefix_and_empty_proto_is_http() {
+        let bad: std::net::IpAddr = "203.0.113.5".parse().unwrap();
+        // An untrusted peer cannot claim https or a mount prefix.
+        let o = resolve(bad, hdr(&[("x-forwarded-proto", "https"), ("x-forwarded-prefix", "/app")]), &t());
+        assert!(!o.https);
+        assert_eq!(o.prefix, "");
+        // A trusted proxy with an empty X-Forwarded-Proto is plain http.
+        let o = resolve("127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-proto", "")]), &t());
+        assert!(!o.https);
+    }
 }
