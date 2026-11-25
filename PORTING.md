@@ -884,3 +884,8 @@ Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_pro
 - **日本語**: `rporea::behind_proxy` に、`X-Forwarded-Proto` は先頭の値だけを見ること(`http, https` は https にならない)、前後の空白と大文字小文字は許容すること、`wss` や空の値は https として扱わないことの試験を足しました(動作変更なし。`cargo test -p rporea behind_proxy` 19件成功)。未了: `serve` への自動組み込み、WebSocket/h2c の転送試験。
 - **English**: I added a test to `rporea::behind_proxy`: only the first `X-Forwarded-Proto` value counts (`http, https` is not https), surrounding spaces and letter case are tolerated, and `wss` or an empty value is never treated as https. No behavior changed. `cargo test -p rporea behind_proxy`: 19 pass. Still open: wiring into `serve` and WebSocket/h2c forwarding tests.
 - English: AI-translated and AI-reviewed for native fluency; not yet checked by a human native speaker.
+
+## 2026-11-25 追記: behind_proxy の接頭辞リストとCIDR空白の試験(自動の小さな保守) / Prefix-list and CIDR-space test (small automated maintenance)
+- **日本語**: `rporea::behind_proxy` に、`X-Forwarded-Prefix` が空白つきのカンマ区切り(`/a, /b`)なら捨てられること、大文字小文字は保たれること、CIDR の前後・スラッシュ周りの空白は許容され、空白だけ・`10.0.0.0/` は不正になることの試験を足しました(動作変更なし。`cargo test -p rporea behind_proxy` 22件成功)。未了: `serve` への自動組み込み、WebSocket/h2c の転送試験。
+- **English**: I added a test to `rporea::behind_proxy`: an `X-Forwarded-Prefix` that is a comma list with a space (`/a, /b`) is dropped, letter case is kept, spaces around a CIDR and around its slash are tolerated, and a blank string or `10.0.0.0/` is invalid. No behavior changed. `cargo test -p rporea behind_proxy`: 22 pass. Still open: wiring into `serve` and WebSocket/h2c forwarding tests.
+- English: AI-translated and AI-reviewed for native fluency; not yet checked by a human native speaker.
