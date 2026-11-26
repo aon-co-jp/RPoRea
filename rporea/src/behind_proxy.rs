@@ -505,6 +505,7 @@ mod tests {
     }
 
     #[test]
+<<<<<<< HEAD
     fn strip_prefix_leaves_query_and_percent_encoded_prefix_alone() {
         // A query string right after the prefix is not a path boundary, so nothing is stripped.
         assert_eq!(strip_prefix("/app?x=1", "/app"), "/app?x=1");
@@ -514,5 +515,16 @@ mod tests {
         let o = resolve(peer, hdr(&[("x-forwarded-prefix", "/%2e%2e")]), &t());
         assert_eq!(o.prefix, "/%2e%2e");
         assert_eq!(strip_prefix("/%2e%2e/x", &o.prefix), "/x");
+=======
+    fn mixed_family_chain_and_tab_separators() {
+        let trusted = vec![Cidr::parse("2001:db8::/32").unwrap(), Cidr::parse("10.0.0.0/8").unwrap()];
+        let peer: IpAddr = "2001:db8::1".parse().unwrap();
+        // IPv6 trusted peer, an IPv4 trusted relay, then the real IPv4 client; tabs around entries are tolerated.
+        let o = resolve(peer, hdr(&[("x-forwarded-for", "1.2.3.4\t,\t10.1.1.1")]), &trusted);
+        assert_eq!(o.client_ip, "1.2.3.4".parse::<IpAddr>().unwrap());
+        // A trusted IPv6 relay in the chain is skipped just like an IPv4 one.
+        let o = resolve(peer, hdr(&[("x-forwarded-for", "203.0.113.9, 2001:db8::2")]), &trusted);
+        assert_eq!(o.client_ip, "203.0.113.9".parse::<IpAddr>().unwrap());
+>>>>>>> 0e5b1b1 (test: behind_proxy mixed-family chain and tab separators)
     }
 }
