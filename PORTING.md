@@ -912,3 +912,8 @@ Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_pro
 ## 2026-11-26 追記: behind_proxy の混在アドレス族の試験 / Mixed-family test
 **日本語**: 異なるアドレス族(IPv4/IPv6)の信頼ホップが混ざる連鎖とタブ区切りの試験を追加(動作変更なし、31件成功)。未了: `serve` への組み込み、WebSocket/h2c。
 **English**: Added a test for chains mixing IPv4 and IPv6 trusted hops, and for tab separators (no behavior change, 31 pass). Open: wiring into `serve`, WebSocket/h2c.
+
+## 2026-11-26 追記: `Cidr::parse_list` を追加(自動の小さな保守) / `Cidr::parse_list` added (small automated maintenance)
+- **日本語**: `rporea::behind_proxy::Cidr::parse_list` を追加しました。カンマ区切りの信頼プロキシ一覧(例: `127.0.0.1, 10.0.0.0/8`)を読み、空の項目は飛ばし、最初の不正な項目をエラーで返します。環境変数から信頼プロキシを設定し、`serve` へ組み込むための下準備です。試験を1件足し `cargo test -p rporea behind_proxy` 33件成功。未了: `serve` への自動組み込み、WebSocket/h2c の転送試験。
+- **English**: Added `Cidr::parse_list` to `rporea::behind_proxy`. It reads a comma-separated trusted-proxy list (for example `127.0.0.1, 10.0.0.0/8`), skips blank entries and returns the first invalid entry as the error. This is groundwork for configuring trusted proxies from an environment variable and wiring them into `serve`. One test added; `cargo test -p rporea behind_proxy`: 33 pass. Still open: wiring into `serve` and WebSocket/h2c forwarding tests.
+- English: AI-translated and AI-reviewed for native fluency; not yet checked by a human native speaker.
