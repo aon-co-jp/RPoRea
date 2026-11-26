@@ -503,4 +503,16 @@ mod tests {
         assert_eq!(prefix("/a\u{3000}b"), "");
         assert_eq!(prefix("/a\u{0}b"), "");
     }
+
+    #[test]
+    fn strip_prefix_leaves_query_and_percent_encoded_prefix_alone() {
+        // A query string right after the prefix is not a path boundary, so nothing is stripped.
+        assert_eq!(strip_prefix("/app?x=1", "/app"), "/app?x=1");
+        assert_eq!(strip_prefix("/app/?x=1", "/app"), "/?x=1");
+        // The prefix is compared literally: a percent-encoded `..` is not decoded, so it stays an ordinary segment.
+        let peer: IpAddr = "127.0.0.1".parse().unwrap();
+        let o = resolve(peer, hdr(&[("x-forwarded-prefix", "/%2e%2e")]), &t());
+        assert_eq!(o.prefix, "/%2e%2e");
+        assert_eq!(strip_prefix("/%2e%2e/x", &o.prefix), "/x");
+    }
 }
