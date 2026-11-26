@@ -11,7 +11,8 @@ repository = "https://github.com/aon-co-jp/RPoRea"
 reaxt = { path = "../../Reaxt" }
 reaxt-rpoem = { path = "../../Reaxt/reaxt-rpoem" }
 open-runo-poem-compat = { path = "../../RPoem/crates/open-runo-poem-compat" }
-tokio = { version = "1", features = ["rt", "macros"] }
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros"] }
+hyper = "1.10"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "io-util", "net", "time"] }

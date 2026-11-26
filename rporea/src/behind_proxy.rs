@@ -124,6 +124,77 @@ pub fn strip_prefix<'a>(path: &'a str, prefix: &str) -> &'a str {
     }
 }
 
+/// Environment variable read by [`crate::start`]: comma-separated trusted proxies (for example `127.0.0.1, 10.0.0.0/8`).
+pub const TRUSTED_ENV: &str = "RPOREA_TRUSTED_PROXIES";
+
+/// Headers the middleware rewrites. Applications read these instead of raw `X-Forwarded-*`.
+pub const CLIENT_IP_HEADER: &str = "x-rporea-client-ip";
+pub const PROTO_HEADER: &str = "x-rporea-proto";
+pub const PREFIX_HEADER: &str = "x-rporea-prefix";
+
+const FORWARDED: [&str; 5] = ["x-forwarded-for", "x-forwarded-proto", "x-forwarded-host", "x-forwarded-prefix", "forwarded"];
+
+/// Rewrite one request in place: resolve the origin from the TCP peer (`PeerAddr`) and trusted proxies,
+/// store it as an extension, set `x-rporea-*` headers, and drop every `X-Forwarded-*` header so
+/// a client can never spoof them past this point. The resolved host replaces `Host`.
+pub fn apply(req: &mut crate::poem::Request, trusted: &[Cidr]) -> Origin {
+    use hyper::header::{HeaderName, HeaderValue};
+    let peer = req
+        .extensions()
+        .get::<crate::poem::hyper_compat::PeerAddr>()
+        .map(|p| p.0.ip())
+        .unwrap_or(IpAddr::from([0, 0, 0, 0]));
+    let headers = req.headers().clone();
+    let origin = resolve(peer, |k| headers.get(k).and_then(|v| v.to_str().ok()).map(str::to_string), trusted);
+    let h = req.headers_mut();
+    // Drop every X-Forwarded-* (Apache also adds X-Forwarded-Server), Forwarded, and our own x-rporea-*.
+    let drop: Vec<HeaderName> = h
+        .keys()
+        .filter(|k| {
+            let k = k.as_str();
+            k.starts_with("x-forwarded-") || FORWARDED.contains(&k) || k.starts_with("x-rporea-")
+        })
+        .cloned()
+        .collect();
+    for name in drop {
+        h.remove(name);
+    }
+    let set = |h: &mut hyper::HeaderMap, k: &'static str, v: &str| {
+        if let Ok(v) = HeaderValue::from_str(v) {
+            h.insert(HeaderName::from_static(k), v);
+        }
+    };
+    set(h, CLIENT_IP_HEADER, &origin.client_ip.to_canonical().to_string());
+    set(h, PROTO_HEADER, if origin.https { "https" } else { "http" });
+    if !origin.prefix.is_empty() {
+        set(h, PREFIX_HEADER, &origin.prefix);
+    }
+    if let Some(host) = &origin.host {
+        set(h, "host", host);
+    }
+    req.extensions_mut().insert(origin.clone());
+    origin
+}
+
+/// Middleware (`Handler -> Handler`) for `Route::with`: runs [`apply`] on every request.
+pub fn layer(trusted: std::sync::Arc<Vec<Cidr>>) -> impl Fn(crate::poem::Handler) -> crate::poem::Handler {
+    move |inner: crate::poem::Handler| {
+        let trusted = trusted.clone();
+        std::sync::Arc::new(move |mut req: crate::poem::Request, params| {
+            apply(&mut req, &trusted);
+            inner(req, params)
+        }) as crate::poem::Handler
+    }
+}
+
+/// Read [`TRUSTED_ENV`]. Unset or blank means "no trusted proxy" (every peer is a client).
+pub fn trusted_from_env() -> Result<Vec<Cidr>, String> {
+    match std::env::var(TRUSTED_ENV) {
+        Ok(v) => Cidr::parse_list(&v),
+        Err(_) => Ok(Vec::new()),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
