@@ -467,7 +467,6 @@ mod tests {
     }
 
     #[test]
-<<<<<<< HEAD
     fn ipv6_case_and_compression_forms_and_zero_prefix_cidr() {
         // uppercase / expanded IPv6 literals in X-Forwarded-For parse to the same address
         let trusted = vec![Cidr::parse("::1").unwrap()];
@@ -481,7 +480,9 @@ mod tests {
         // the loopback /128 matches only itself
         assert!(trusted[0].contains(peer));
         assert!(!trusted[0].contains("::2".parse().unwrap()));
-=======
+    }
+
+    #[test]
     fn short_mapped_cidr_stays_ipv6_and_does_not_match_ipv4() {
         // /64 is shorter than the 96-bit mapped prefix, so it is a plain IPv6 range.
         let c = Cidr::parse("::ffff:10.0.0.0/64").unwrap();
@@ -490,6 +491,5 @@ mod tests {
         assert!(c.contains("::1".parse().unwrap()));
         assert!(c.contains("0:0:0:0:1:2:3:4".parse().unwrap()));
         assert!(!c.contains("0:0:0:1::".parse().unwrap()));
->>>>>>> fa09938 (test: behind_proxy short mapped CIDR stays IPv6)
     }
 }
