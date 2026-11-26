@@ -465,4 +465,20 @@ mod tests {
         let o = resolve("::ffff:203.0.113.1".parse().unwrap(), hdr(&[("x-forwarded-for", "1.2.3.4")]), &t());
         assert_eq!(o.client_ip.to_string(), "::ffff:203.0.113.1");
     }
+
+    #[test]
+    fn ipv6_case_and_compression_forms_and_zero_prefix_cidr() {
+        // uppercase / expanded IPv6 literals in X-Forwarded-For parse to the same address
+        let trusted = vec![Cidr::parse("::1").unwrap()];
+        let peer: IpAddr = "::1".parse().unwrap();
+        let o = resolve(peer, hdr(&[("x-forwarded-for", "2001:0DB8:0000:0000:0000:0000:0000:0001")]), &trusted);
+        assert_eq!(o.client_ip, "2001:db8::1".parse::<IpAddr>().unwrap());
+        // a /0 IPv4 network trusts every IPv4 peer but still no IPv6 peer
+        let all4 = Cidr::parse("0.0.0.0/0").unwrap();
+        assert!(all4.contains("203.0.113.9".parse().unwrap()));
+        assert!(!all4.contains("2001:db8::1".parse().unwrap()));
+        // the loopback /128 matches only itself
+        assert!(trusted[0].contains(peer));
+        assert!(!trusted[0].contains("::2".parse().unwrap()));
+    }
 }
