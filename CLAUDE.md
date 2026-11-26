@@ -1014,3 +1014,8 @@ Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_pro
 - **日本語**: `rporea::behind_proxy` に、`::ffff:10.0.0.0/64` のように射影接頭辞(96ビット)より短い CIDR は通常のIPv6範囲のままで、IPv4 の接続元には一致しないことの試験を足しました(動作変更なし。`cargo test -p rporea behind_proxy` 28件成功)。未了: `serve` への自動組み込み、WebSocket/h2c の転送試験。
 - **English**: I added a test to `rporea::behind_proxy`: a CIDR shorter than the 96-bit mapped prefix, such as `::ffff:10.0.0.0/64`, stays a plain IPv6 range and never matches an IPv4 peer. No behavior changed. `cargo test -p rporea behind_proxy`: 28 pass. Still open: wiring into `serve` and WebSocket/h2c forwarding tests.
 - AI-translated and AI-reviewed for native fluency (English); not yet checked by a human native speaker.
+
+## 2026-11-26 追記: behind_proxy の非ASCII接頭辞と全角空白・NULの試験(自動の小さな保守) / Non-ASCII prefix, wide-space and NUL test (small automated maintenance)
+- **日本語**: `rporea::behind_proxy` に、`X-Forwarded-Prefix` の日本語など非ASCIIの接頭辞(`/アプリ/` → `/アプリ`)は保たれ、全角空白(U+3000)とNUL文字を含む接頭辞は捨てられることの試験を足しました(動作変更なし)。兄弟リポジトリが欠けた環境のため `rustc --test` で単独実行し30件成功(`cargo test --workspace` は未実行)。未了: `serve` への自動組み込み、WebSocket/h2c の転送試験。
+- **English**: I added a test to `rporea::behind_proxy`: a non-ASCII `X-Forwarded-Prefix` (`/アプリ/` becomes `/アプリ`) is kept, while a prefix containing a full-width space (U+3000) or a NUL character is dropped. No behavior changed. Sibling repos are missing here, so I ran the module alone with `rustc --test` (30 pass); `cargo test --workspace` was not run. Still open: wiring into `serve` and WebSocket/h2c forwarding tests.
+- English: AI-translated and AI-reviewed for native fluency; not yet checked by a human native speaker.

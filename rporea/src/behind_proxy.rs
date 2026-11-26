@@ -492,4 +492,15 @@ mod tests {
         assert!(c.contains("0:0:0:0:1:2:3:4".parse().unwrap()));
         assert!(!c.contains("0:0:0:1::".parse().unwrap()));
     }
+
+    #[test]
+    fn non_ascii_prefix_is_kept_but_wide_space_and_nul_are_dropped() {
+        let peer: IpAddr = "127.0.0.1".parse().unwrap();
+        let prefix = |v: &str| resolve(peer, hdr(&[("x-forwarded-prefix", v)]), &t()).prefix;
+        // A non-ASCII path segment is a legitimate mount point.
+        assert_eq!(prefix("/アプリ/"), "/アプリ");
+        // A full-width space (U+3000) counts as whitespace, and NUL as a control character: both are dropped.
+        assert_eq!(prefix("/a\u{3000}b"), "");
+        assert_eq!(prefix("/a\u{0}b"), "");
+    }
 }
