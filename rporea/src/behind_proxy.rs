@@ -440,4 +440,18 @@ mod tests {
         assert!(one.contains("10.0.0.5".parse().unwrap()));
         assert!(!one.contains("10.0.0.6".parse().unwrap()));
     }
+
+    #[test]
+    fn xff_entry_with_port_or_zone_is_garbage_and_keeps_peer() {
+        let trusted = vec![Cidr::parse("127.0.0.1").unwrap()];
+        let peer: IpAddr = "127.0.0.1".parse().unwrap();
+        for bad in ["1.2.3.4:5678", "fe80::1%eth0", "unknown", "  "] {
+            let get = |k: &str| (k == "x-forwarded-for").then(|| bad.to_string());
+            let o = resolve(peer, get, &trusted);
+            assert_eq!(o.client_ip, peer, "{bad:?} must not be accepted");
+        }
+        // a good hop on the left of a bad one is never reached
+        let get = |k: &str| (k == "x-forwarded-for").then(|| "9.9.9.9, 1.2.3.4:80".to_string());
+        assert_eq!(resolve(peer, get, &trusted).client_ip, peer);
+    }
 }
