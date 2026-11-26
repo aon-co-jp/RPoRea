@@ -15,4 +15,5 @@ tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros"] }
 hyper = "1.10"
 
 [dev-dependencies]
+open-runo-appserver = { path = "../../RPoem/crates/open-runo-appserver" }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "io-util", "net", "time"] }
