@@ -908,3 +908,7 @@ Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_pro
 ## 2026-11-26: behind_proxy non-ASCII prefix test / 非ASCII接頭辞の試験
 - 日本語: `behind_proxy` に、非ASCII接頭辞は保持、全角空白・NULを含む接頭辞は破棄する試験を追加(動作変更なし、単独 `rustc --test` で30件成功)。
 - English: Added a `behind_proxy` test: a non-ASCII prefix is kept, and a prefix with a full-width space or NUL is dropped (no behavior change; 30 pass via standalone `rustc --test`).
+
+## 2026-11-26 追記: behind_proxy の混在アドレス族の試験 / Mixed-family test
+**日本語**: 異なるアドレス族(IPv4/IPv6)の信頼ホップが混ざる連鎖とタブ区切りの試験を追加(動作変更なし、31件成功)。未了: `serve` への組み込み、WebSocket/h2c。
+**English**: Added a test for chains mixing IPv4 and IPv6 trusted hops, and for tab separators (no behavior change, 31 pass). Open: wiring into `serve`, WebSocket/h2c.
