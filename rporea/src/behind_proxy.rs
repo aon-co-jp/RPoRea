@@ -617,4 +617,16 @@ mod tests {
         assert!(Cidr::parse_list("").unwrap().is_empty());
         assert_eq!(Cidr::parse_list("10.0.0.0/8, nope, 1.1.1.1/99"), Err("nope".to_string()));
     }
+
+    #[test]
+    fn parse_list_rejects_other_separators_and_keeps_duplicates() {
+        // Only commas separate entries; a semicolon or space-only separation is one invalid entry.
+        assert_eq!(Cidr::parse_list("10.0.0.0/8;127.0.0.1"), Err("10.0.0.0/8;127.0.0.1".to_string()));
+        assert_eq!(Cidr::parse_list("10.0.0.1 127.0.0.1"), Err("10.0.0.1 127.0.0.1".to_string()));
+        // Duplicates are kept as given and still behave the same.
+        let l = Cidr::parse_list("10.0.0.0/8,10.0.0.0/8").unwrap();
+        assert_eq!(l.len(), 2);
+        assert_eq!(l[0], l[1]);
+        assert_eq!(TRUSTED_ENV, "RPOREA_TRUSTED_PROXIES");
+    }
 }
