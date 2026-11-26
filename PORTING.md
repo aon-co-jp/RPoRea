@@ -899,3 +899,8 @@ Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_pro
 - **日本語**: `rporea::behind_proxy::resolve` に、デュアルスタックのソケットが報告する `::ffff:127.0.0.1` の接続元が、信頼プロキシとして通しで認められ `X-Forwarded-*` が使われること、信頼されない射影接続元ではヘッダーが無視されることの試験を足しました(動作変更なし。`cargo test -p rporea behind_proxy` 27件成功)。未了: `serve` への自動組み込み、WebSocket/h2c の転送試験。
 - **English**: I added a test to `rporea::behind_proxy::resolve`: a peer reported as `::ffff:127.0.0.1` by a dual-stack socket is trusted end to end and its `X-Forwarded-*` headers are used, while an untrusted mapped peer has them ignored. No behavior changed. `cargo test -p rporea behind_proxy`: 27 pass. Still open: wiring into `serve` and WebSocket/h2c forwarding tests.
 - AI-written English, re-read as a careful editor; not yet checked by a human native speaker.
+
+## 2026-11-26 追記: behind_proxy の短い射影IPv6 CIDR の試験(自動の小さな保守) / Short mapped-CIDR test (small automated maintenance)
+- **日本語**: `rporea::behind_proxy` に、`::ffff:10.0.0.0/64` のように射影接頭辞(96ビット)より短い CIDR は通常のIPv6範囲のままで、IPv4 の接続元には一致しないことの試験を足しました(動作変更なし。`cargo test -p rporea behind_proxy` 28件成功)。未了: `serve` への自動組み込み、WebSocket/h2c の転送試験。
+- **English**: I added a test to `rporea::behind_proxy`: a CIDR shorter than the 96-bit mapped prefix, such as `::ffff:10.0.0.0/64`, stays a plain IPv6 range and never matches an IPv4 peer. No behavior changed. `cargo test -p rporea behind_proxy`: 28 pass. Still open: wiring into `serve` and WebSocket/h2c forwarding tests.
+- AI-translated and AI-reviewed for native fluency (English); not yet checked by a human native speaker.
