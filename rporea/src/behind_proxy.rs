@@ -629,4 +629,20 @@ mod tests {
         assert_eq!(l[0], l[1]);
         assert_eq!(TRUSTED_ENV, "RPOREA_TRUSTED_PROXIES");
     }
+
+    #[test]
+    fn trusted_from_env_reads_unset_blank_valid_and_invalid_values() {
+        // This is the only test that touches the variable, so it cannot race with the others.
+        std::env::remove_var(TRUSTED_ENV);
+        assert!(trusted_from_env().unwrap().is_empty());
+        std::env::set_var(TRUSTED_ENV, "   ");
+        assert!(trusted_from_env().unwrap().is_empty());
+        std::env::set_var(TRUSTED_ENV, "127.0.0.1, 10.0.0.0/8");
+        let l = trusted_from_env().unwrap();
+        assert_eq!(l.len(), 2);
+        assert!(l[1].contains("10.2.3.4".parse().unwrap()));
+        std::env::set_var(TRUSTED_ENV, "10.0.0.0/8, nope");
+        assert_eq!(trusted_from_env(), Err("nope".to_string()));
+        std::env::remove_var(TRUSTED_ENV);
+    }
 }
