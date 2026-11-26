@@ -32,6 +32,16 @@ impl Cidr {
         Some(Cidr { net, bits })
     }
 
+    /// Parse a comma-separated list such as `127.0.0.1, 10.0.0.0/8` (for an environment variable).
+    /// Blank entries are skipped; the first invalid entry is returned as the error.
+    pub fn parse_list(s: &str) -> Result<Vec<Cidr>, String> {
+        s.split(',')
+            .map(str::trim)
+            .filter(|e| !e.is_empty())
+            .map(|e| Cidr::parse(e).ok_or_else(|| e.to_string()))
+            .collect()
+    }
+
     pub fn contains(&self, ip: IpAddr) -> bool {
         fn bits_of(ip: IpAddr) -> u128 {
             match ip {
@@ -526,5 +536,14 @@ mod tests {
         // A trusted IPv6 relay in the chain is skipped just like an IPv4 one.
         let o = resolve(peer, hdr(&[("x-forwarded-for", "203.0.113.9, 2001:db8::2")]), &trusted);
         assert_eq!(o.client_ip, "203.0.113.9".parse::<IpAddr>().unwrap());
+    }
+
+    #[test]
+    fn parse_list_reads_commas_skips_blanks_and_reports_first_bad_entry() {
+        let l = Cidr::parse_list(" 127.0.0.1 , 10.0.0.0/8,, ::1 ").unwrap();
+        assert_eq!(l.len(), 3);
+        assert!(l[1].contains("10.9.9.9".parse().unwrap()));
+        assert!(Cidr::parse_list("").unwrap().is_empty());
+        assert_eq!(Cidr::parse_list("10.0.0.0/8, nope, 1.1.1.1/99"), Err("nope".to_string()));
     }
 }
