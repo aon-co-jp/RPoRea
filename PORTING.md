@@ -933,3 +933,7 @@ Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_pro
 ## 2026-11-26 追記: trusted_from_env の試験 / trusted_from_env test
 - **日本語**: `behind_proxy::trusted_from_env` の試験を追加(動作変更なし、34件成功)。未了: WebSocket/h2c 転送試験、TLS 終端背後の実確認。
 - **English**: Added a test for `behind_proxy::trusted_from_env` (no behavior change, 34 pass). Still open: WebSocket/h2c forwarding tests and a real check behind TLS termination.
+
+## 2026-11-27 追記: cargo test --workspace / Update
+**日本語**: WSL(Ubuntu-24.04)で cargo test --workspace を実行し、36件+2件が成功、失敗0(未了だった項目を実測で確認)。残り: WebSocket・h2c 転送試験、TLS終端の背後での X-Forwarded-Proto、open-runo-appserver 連携。
+**English**: cargo test --workspace in WSL (Ubuntu-24.04): 36 + 2 tests pass, 0 failed (previously unrun item now measured). Open: WebSocket/h2c forwarding tests, X-Forwarded-Proto behind TLS termination, open-runo-appserver link.
