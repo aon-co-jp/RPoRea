@@ -454,4 +454,15 @@ mod tests {
         let get = |k: &str| (k == "x-forwarded-for").then(|| "9.9.9.9, 1.2.3.4:80".to_string());
         assert_eq!(resolve(peer, get, &trusted).client_ip, peer);
     }
+
+    #[test]
+    fn dual_stack_mapped_peer_is_trusted_end_to_end() {
+        // A dual-stack listener reports the loopback peer as ::ffff:127.0.0.1; it must still count as trusted.
+        let o = resolve("::ffff:127.0.0.1".parse().unwrap(), hdr(&[("x-forwarded-for", "198.51.100.9"), ("x-forwarded-proto", "https")]), &t());
+        assert_eq!(o.client_ip.to_string(), "198.51.100.9");
+        assert!(o.https);
+        // an unrelated mapped peer is not trusted, so the headers are ignored
+        let o = resolve("::ffff:203.0.113.1".parse().unwrap(), hdr(&[("x-forwarded-for", "1.2.3.4")]), &t());
+        assert_eq!(o.client_ip.to_string(), "::ffff:203.0.113.1");
+    }
 }

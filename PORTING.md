@@ -894,3 +894,8 @@ Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_pro
 - **日本語**: 信頼プロキシの設定に `::ffff:10.0.0.0/104` のような IPv4射影IPv6の CIDR を書いても、IPv4 の `10.0.0.0/8` と同じに扱うようにしました(`Cidr::parse`)。これまでは接続元の側だけ正規化していたため、この書き方では一致しませんでした。試験を1件足し `cargo test -p rporea behind_proxy` 24件成功。未了: `serve` への自動組み込み、WebSocket/h2c の転送試験。
 - **English**: A trusted-proxy CIDR written as IPv4-mapped IPv6 (such as `::ffff:10.0.0.0/104`) is now treated the same as the plain IPv4 `10.0.0.0/8` (`Cidr::parse`). Before, only the peer address was normalised, so this spelling never matched. One test added; `cargo test -p rporea behind_proxy`: 24 pass. Still open: wiring into `serve` and WebSocket/h2c forwarding tests.
 - AI-translated and AI-reviewed for native fluency (English); not yet checked by a human native speaker.
+
+## 2026-11-26 追記: behind_proxy のデュアルスタック接続元の通し試験(自動の小さな保守) / Dual-stack peer end-to-end test (small automated maintenance)
+- **日本語**: `rporea::behind_proxy::resolve` に、デュアルスタックのソケットが報告する `::ffff:127.0.0.1` の接続元が、信頼プロキシとして通しで認められ `X-Forwarded-*` が使われること、信頼されない射影接続元ではヘッダーが無視されることの試験を足しました(動作変更なし。`cargo test -p rporea behind_proxy` 27件成功)。未了: `serve` への自動組み込み、WebSocket/h2c の転送試験。
+- **English**: I added a test to `rporea::behind_proxy::resolve`: a peer reported as `::ffff:127.0.0.1` by a dual-stack socket is trusted end to end and its `X-Forwarded-*` headers are used, while an untrusted mapped peer has them ignored. No behavior changed. `cargo test -p rporea behind_proxy`: 27 pass. Still open: wiring into `serve` and WebSocket/h2c forwarding tests.
+- AI-written English, re-read as a careful editor; not yet checked by a human native speaker.
