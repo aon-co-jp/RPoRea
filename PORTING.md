@@ -937,3 +937,7 @@ Status: RPoem and Reaxt combined (Rust first, with a C ABI). Recently behind_pro
 ## 2026-11-27 追記: cargo test --workspace / Update
 **日本語**: WSL(Ubuntu-24.04)で cargo test --workspace を実行し、36件+2件が成功、失敗0(未了だった項目を実測で確認)。残り: WebSocket・h2c 転送試験、TLS終端の背後での X-Forwarded-Proto、open-runo-appserver 連携。
 **English**: cargo test --workspace in WSL (Ubuntu-24.04): 36 + 2 tests pass, 0 failed (previously unrun item now measured). Open: WebSocket/h2c forwarding tests, X-Forwarded-Proto behind TLS termination, open-runo-appserver link.
+
+## 2026-11-27 追記: h2c の直接接続の実測 / h2c direct connection measured
+**日本語**: `whoami` 例(`start_route`、127.0.0.1のみ)に curl で接続: HTTP/1.1=200、`--http2-prior-knowledge`(h2c)=200・HTTP/2、`--http2`(Upgrade)=200 だが HTTP/1.1 のまま(Upgrade での h2 昇格は行われない)。いずれも `xff_leaked=false`。**未確認**: プロキシ(nginx/Apache)経由の h2c 転送、WebSocket(RPoRea に WebSocket の処理コードが無いため、まず実装が要る)。
+**English**: Against the `whoami` example (`start_route`, 127.0.0.1 only) with curl: HTTP/1.1 = 200; `--http2-prior-knowledge` (h2c) = 200 over HTTP/2; `--http2` (Upgrade) = 200 but stays on HTTP/1.1 (no h2 upgrade via Upgrade). All show `xff_leaked=false`. **Not verified**: h2c forwarding through nginx/Apache, and WebSocket (RPoRea has no WebSocket handling code, so it must be implemented first).
