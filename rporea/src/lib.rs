@@ -103,3 +103,50 @@ mod proxy_tests {
         assert!(out.contains("client=9.9.9.9 proto=https host=example.com prefix=/app leaked=false"), "{out}");
     }
 }
+
+#[cfg(test)]
+mod ws_tests {
+    use super::*;
+    use reaxt::app::{Params, WsEvent, WsOut};
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+    /// 本番向けの既定(トレース・圧縮・プロキシ層)を通しても、WebSocket が実ソケットで往復できる。
+    #[tokio::test]
+    async fn websocket_works_through_production_layers() {
+        let app = Arc::new(
+            App::new("rporea")
+                .ws(
+                    "echo/[who].rs",
+                    Arc::new(|p: &Params, ev: &WsEvent| match ev {
+                        WsEvent::Open => vec![WsOut::Send(format!("hello {}", p[0].1))],
+                        WsEvent::Text(t) => vec![WsOut::Send(format!("echo {t}"))],
+                        WsEvent::Close => vec![],
+                    }),
+                )
+                .finish(),
+        );
+        let (addr, _h) = start(app, ([127, 0, 0, 1], 0)).await.unwrap();
+        let mut s = tokio::net::TcpStream::connect(addr).await.unwrap();
+        s.write_all(b"GET /echo/ann HTTP/1.1\r\nhost: x\r\nupgrade: websocket\r\nconnection: Upgrade\r\nsec-websocket-key: dGhlIHNhbXBsZSBub25jZQ==\r\nsec-websocket-version: 13\r\naccept-encoding: gzip\r\n\r\n").await.unwrap();
+        let mut head = Vec::new();
+        while !head.ends_with(b"\r\n\r\n") {
+            head.push(s.read_u8().await.unwrap());
+        }
+        assert!(String::from_utf8_lossy(&head).starts_with("HTTP/1.1 101"), "{}", String::from_utf8_lossy(&head));
+        let mut h = [0u8; 2];
+        s.read_exact(&mut h).await.unwrap();
+        let mut b = vec![0u8; (h[1] & 0x7f) as usize];
+        s.read_exact(&mut b).await.unwrap();
+        assert_eq!(String::from_utf8(b).unwrap(), "hello ann");
+        let k = [9u8, 8, 7, 6];
+        let msg = b"ping";
+        let mut f = vec![0x81, 0x80 | msg.len() as u8];
+        f.extend_from_slice(&k);
+        f.extend(msg.iter().enumerate().map(|(i, b)| b ^ k[i % 4]));
+        s.write_all(&f).await.unwrap();
+        s.read_exact(&mut h).await.unwrap();
+        let mut b = vec![0u8; (h[1] & 0x7f) as usize];
+        s.read_exact(&mut b).await.unwrap();
+        assert_eq!(String::from_utf8(b).unwrap(), "echo ping");
+    }
+}
