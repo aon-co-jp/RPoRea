@@ -15,7 +15,10 @@ class H(http.server.BaseHTTPRequestHandler):
 http.server.HTTPServer(("127.0.0.1",8769),H).serve_forever()
 PY
 sleep 2
+[ -f /tmp/rporea-tls.crt ] || openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj /CN=localhost -keyout /tmp/rporea-tls.key -out /tmp/rporea-tls.crt >/dev/null 2>&1
 cat >/etc/nginx/conf.d/rporea-test.conf <<'N'
+server { listen 127.0.0.1:18443 ssl; ssl_certificate /tmp/rporea-tls.crt; ssl_certificate_key /tmp/rporea-tls.key;
+ location /who/ { proxy_pass http://127.0.0.1:8770/; proxy_set_header Host $host; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; proxy_set_header X-Forwarded-Proto $scheme; proxy_set_header X-Forwarded-Prefix /who; } }
 server { listen 127.0.0.1:18080;
  location /app/ { proxy_pass http://127.0.0.1:8768/; proxy_set_header Host $host; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; proxy_set_header X-Forwarded-Proto $scheme; proxy_set_header X-Forwarded-Prefix /app; }
  location /who/ { proxy_pass http://127.0.0.1:8770/; proxy_set_header Host $host; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; proxy_set_header X-Forwarded-Proto $scheme; proxy_set_header X-Forwarded-Prefix /who; }
@@ -51,4 +54,6 @@ for p in 18080 18081; do
  curl -s -H "X-Forwarded-For: 9.9.9.9" http://127.0.0.1:$p/echo/x/y | python3 -c "import sys,json;d=json.load(sys.stdin);h=d['headers'];print('path',d['path'],'xff',h.get('x-forwarded-for'),'proto',h.get('x-forwarded-proto'),'prefix',h.get('x-forwarded-prefix'),'host',h.get('host'))"
   curl -s -H "X-Forwarded-For: 9.9.9.9" http://127.0.0.1:$p/who/x/y
 done
+echo "== TLS termination (nginx 18443)"
+curl -sk https://127.0.0.1:18443/who/x/y
 service nginx stop >/dev/null 2>&1; service apache2 stop >/dev/null 2>&1; pkill -f rporea-target; pkill -f "python3 -"; true
